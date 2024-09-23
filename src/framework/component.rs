@@ -12,17 +12,6 @@ use {
 
 pub type Children = HashMap<String, Box<dyn Component>>;
 
-// #[derive(Error, Debug)]
-// pub enum ComponentError {
-//     #[error("Component error: {0}")]
-//     ComponentError(String),
-// }
-
-// type Result<T> = std::result::Result<T, ComponentError>;
-
-// TODO: create a component! macro to simplify the creation of components, adding the boilerplate
-// code, similar to what we do with the `rustler!` macro in the `rustler` crate.
-
 /// `Component` is a trait that represents a visual and interactive element of the user interface.
 /// Implementors of this trait can be registered with the main application loop and will be able to
 /// receive events,

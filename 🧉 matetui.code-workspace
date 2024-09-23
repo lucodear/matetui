@@ -1,0 +1,20 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "terminal.integrated.env.windows": {
+            // allows to run the command in the terminal for development purposes
+            "PATH": "${workspaceFolder}/target/debug;${env:PATH}",
+        },
+        "lucodear-icons.activeIconPack": "rust_ferris",
+        "lucodear-icons.folders.associations": {
+            ".cargo": "rust",
+        },
+        "lucodear-icons.files.associations": {
+        
+        }
+    }
+}

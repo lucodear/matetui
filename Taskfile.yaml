@@ -1,0 +1,63 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  dev:
+    desc: 👨🏻‍💻 run matetui in «dev» mode
+    cmds:
+      - cargo watch -c -x "run --"
+
+  build:watch:
+    desc: ⚡ watch matetui «build»
+    cmds:
+      - cargo watch -c -x "build"
+
+  build:check:
+    desc: ⚡ build ids «release» and check the size
+    cmds:
+      - cargo build --release
+      - python check_size.py
+
+  fmt:
+    desc: 🎨 format matetui
+    cmds:
+      - cargo +nightly fmt --all
+  
+  fmt:check:
+    desc: 🎨 check matetui formatting
+    cmds:
+      - cargo +nightly fmt --all --check
+
+  lint:
+    desc: 🧶 lint matetui
+    cmds:
+      - cargo clippy --fix --workspace --allow-staged
+  
+  lint:check:
+    desc: 🧶 check matetui linting
+    cmds:
+      - cargo clippy --workspace
+
+  fmt+lint:
+    desc: 🎨🧶 format and lint matetui
+    cmds:
+      - task fmt
+      - git add .
+      - task lint
+
+  release:patch:
+    desc: 🚀 release matetui
+    cmds:
+      - cargo release patch --execute --no-confirm --package matetui
+
+  release:minor:
+    desc: 🚀 release matetui
+    cmds:
+      - cargo release minor --execute --no-confirm --package matetui
+
+  release:major:
+    desc: 🚀 release matetui
+    cmds:
+      - cargo release major --execute --no-confirm --package matetui
+

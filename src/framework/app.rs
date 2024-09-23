@@ -1,6 +1,6 @@
 use {
     super::{
-        component::Component,
+        component::{Component, ComponentHandler},
         events::{Action, ActionKind, Event},
         keyboard::KeyBindings,
         tui::Tui,
@@ -23,14 +23,15 @@ pub enum MatetuiError {
 }
 
 pub struct App {
-    pub tick_rate: f64,
-    pub frame_rate: f64,
-    pub components: Vec<Box<dyn Component>>,
-    pub should_quit: bool,
+    tick_rate: f64,
+    frame_rate: f64,
+    should_quit: bool,
     // pub should_suspend: bool,
-    pub keybindings: KeyBindings,
-    pub last_tick_key_events: Vec<KeyEvent>,
-    pub mouse: bool,
+    keybindings: KeyBindings,
+    last_tick_key_events: Vec<KeyEvent>,
+    mouse: bool,
+    paste: bool,
+    component_handlers: Vec<ComponentHandler>,
     action_tx: mpsc::UnboundedSender<String>,
     action_rx: mpsc::UnboundedReceiver<String>,
 }
@@ -41,12 +42,13 @@ impl Default for App {
         Self {
             last_tick_key_events: Vec::default(),
             keybindings: KeyBindings::default(),
-            components: Vec::new(),
+            component_handlers: Vec::new(),
             frame_rate: 4.into(),
             tick_rate: 1.into(),
             should_quit: false,
             // should_suspend: false,
             mouse: false,
+            paste: false,
             action_tx,
             action_rx,
         }
@@ -58,16 +60,20 @@ impl App {
     pub fn new<const N: usize>(kb: [(&str, &str); N], components: Vec<Box<dyn Component>>) -> Self {
         let keybindings = KeyBindings::new(kb);
 
+        let component_handlers =
+            components.into_iter().map(ComponentHandler::for_).collect::<Vec<_>>();
+
         Self {
+            component_handlers,
             keybindings,
-            components,
             ..Self::default()
         }
     }
 
     /// Set the components
     pub fn with_components(mut self, components: Vec<Box<dyn Component>>) -> Self {
-        self.components = components;
+        self.component_handlers =
+            components.into_iter().map(ComponentHandler::for_).collect::<Vec<_>>();
         self
     }
 
@@ -92,6 +98,18 @@ impl App {
         self
     }
 
+    /// Set the mouse
+    pub fn with_mouse(mut self, mouse: bool) -> Self {
+        self.mouse = mouse;
+        self
+    }
+
+    /// Set the paste
+    pub fn with_paste(mut self, paste: bool) -> Self {
+        self.paste = paste;
+        self
+    }
+
     fn send(&self, action: Action) -> Result<(), MatetuiError> {
         match action {
             Action::AppAction(cmd) => self.action_tx.send(cmd)?,
@@ -106,16 +124,20 @@ impl App {
     }
 
     pub async fn run(&mut self) -> Result<(), MatetuiError> {
-        let mut tui = Tui::new()?.tick_rate(self.tick_rate).frame_rate(self.frame_rate);
+        let mut tui = Tui::new()?
+            .tick_rate(self.tick_rate)
+            .frame_rate(self.frame_rate)
+            .mouse(self.mouse)
+            .paste(self.paste);
 
         tui.enter()?;
 
-        for component in self.components.iter_mut() {
-            component.register_action_handler(self.action_tx.clone());
+        for handler in self.component_handlers.iter_mut() {
+            handler.receive_action_handler(self.action_tx.clone());
         }
 
-        for component in self.components.iter_mut() {
-            component.init(tui.size()?);
+        for handler in self.component_handlers.iter_mut() {
+            handler.handle_init(tui.size()?);
         }
 
         loop {
@@ -151,11 +173,9 @@ impl App {
                 }
                 let mut actions = Vec::new();
 
-                for component in self.components.iter_mut() {
-                    if component.is_active() {
-                        let component_actions = component.handle_events(Some(e.clone()));
-                        actions.extend(component_actions);
-                    }
+                for handler in self.component_handlers.iter_mut() {
+                    let component_actions = handler.handle_events(Some(e.clone()));
+                    actions.extend(component_actions);
                 }
 
                 for action in actions {
@@ -170,10 +190,8 @@ impl App {
                         Action::Quit => self.should_quit = true,
                         Action::Render => {
                             tui.draw(|f| {
-                                for component in self.components.iter_mut() {
-                                    if component.is_active() {
-                                        component.draw(f, f.area());
-                                    }
+                                for handler in self.component_handlers.iter_mut() {
+                                    handler.handle_draw(f, f.area());
                                 }
                             })?;
                         }
@@ -194,18 +212,14 @@ impl App {
                         _ => {}
                     }
 
-                    for component in self.components.iter_mut() {
-                        if component.is_active() {
-                            component.update(a.clone());
-                        }
+                    for handler in self.component_handlers.iter_mut() {
+                        handler.handle_update(a.clone());
                     }
                 } else {
                     // unrecognized action, might be a custom component action
                     // send it to all components as a raw string
-                    for component in self.components.iter_mut() {
-                        if component.is_active() {
-                            component.receive_message(action.clone());
-                        }
+                    for handler in self.component_handlers.iter_mut() {
+                        handler.handle_message(action.clone());
                     }
                 }
             }

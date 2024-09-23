@@ -216,6 +216,8 @@ the `coco` package (conventional commit cli utility). That is:
   key to submit the "form" or cofirm the input.
 - Removes all key bindings of stripped functionalities.
 
+![textarea](https://raw.githubusercontent.com/lucodear/matetui/master/.github/media/textarea.png)
+
 #### Validation
 
 In this implementation, the `TextArea` widget also supports validation. The validation is done by
@@ -242,7 +244,7 @@ textarea..with_validations(vec![
 A selector restful widget that can be used to select items from a list. The items are displayed in a
 grid, and the user can navigate through them using, for example, the arrow keys.
 
-![grid selector](.github/media/grid.png)
+![grid selector](https://raw.githubusercontent.com/lucodear/matetui/master/.github/media/grid.png)
 
 ### Example
 

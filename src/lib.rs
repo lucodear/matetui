@@ -15,20 +15,13 @@ mod framework {
 
 pub use framework::{
     app::App,
-    component::{Children, Component, ComponentAccessors},
+    component::{child_downcast, child_downcast_mut, Children, Component, ComponentAccessors},
     events::{Action, ActionKind, Event},
     keyboard::KeyBindings,
     tui::{Frame, Tui, IO},
 };
 
 pub mod utils {
-    pub mod component {
-        pub use super::super::framework::component::{
-            child_downcast, child_downcast_mut, init_children, pass_action_handler_to_children,
-            pass_message_to_children, set_active_on_children, update_children,
-        };
-    }
-
     pub mod keyboard {
         pub use super::super::framework::keyboard::{key_event_to_string, parse_key_sequence};
     }

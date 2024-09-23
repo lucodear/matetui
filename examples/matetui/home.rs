@@ -50,14 +50,6 @@ impl Component for Home {
             }
             _ => {}
         }
-
-        // when we override the receive_message method, the default behavior is not executed.
-        // by default, the message is passed to all children components. If we want to keep this
-        // behavior, we need to call the pass_message_to_children method.
-        // there are convenience methods to "reimplement" the default behavior for all
-        // Component methods that can be overridden:
-
-        // pass_message_to_children(self, message);
     }
 
     fn draw(&mut self, f: &mut matetui::Frame<'_>, area: ratatui::prelude::Rect) {

@@ -12,23 +12,33 @@ use {
 
 pub type Children = HashMap<String, Box<dyn Component>>;
 
+/// The ComponentHandler is a wrapper around a component that provides a way to handle the lifecycle
+/// of the components and its children without overloading the component trait with too many
+/// responsibilities.
+///
+/// By delegating the handling of events, updates, and drawing to the ComponentHandler, the
+/// component trait API is kept clean for the user to implement only the necessary methods.
+///
+/// The [ComponentHandler] will wrap the main component (the one passed to the [crate::App]
+/// constructor) and propagate all the necessary events and function calls to all their children
+/// recursively by using the utility functions in this module ([update], [handle_event_for],
+/// [handle_message], [init]).
 pub(crate) struct ComponentHandler {
     c: Box<dyn Component>,
 }
 
 impl ComponentHandler {
+    /// Create a new [ComponentHandler] for a specific component.
     pub fn for_(component: Box<dyn Component>) -> Self {
         Self { c: component }
     }
 
-    #[allow(unused)]
     pub(crate) fn handle_init(&mut self, area: Size) {
-        self.c.init(area);
-        init_children(self.c.as_mut(), area)
+        init(self.c.as_mut(), area);
     }
 
     pub(crate) fn receive_action_handler(&mut self, tx: UnboundedSender<String>) {
-        self.c.register_action_handler(tx.clone());
+        receive_action_handler(self.c.as_mut(), tx);
     }
 
     pub(crate) fn handle_events(&mut self, event: Option<Event>) -> Vec<Action> {
@@ -36,17 +46,11 @@ impl ComponentHandler {
     }
 
     pub(crate) fn handle_update(&mut self, action: Action) {
-        if self.c.is_active() {
-            self.c.update(&action);
-            update_children(self.c.as_mut(), action)
-        }
+        update(self.c.as_mut(), &action);
     }
 
     pub(crate) fn handle_message(&mut self, message: String) {
-        if self.c.is_active() {
-            self.c.receive_message(message.clone());
-            pass_message_to_children(self.c.as_mut(), message)
-        }
+        handle_message(self.c.as_mut(), message);
     }
 
     pub(crate) fn handle_draw(&mut self, f: &mut Frame<'_>, area: Rect) {
@@ -169,6 +173,19 @@ pub trait Component: Downcast + ComponentAccessors {
 
     /// Get a child component by name as a mutable reference.
     ///
+    /// The method will return the child as a mutable reference to a `Box<dyn Component>`, which
+    /// means that the caller will have to downcast it to the desired type if necessary.
+    ///
+    /// ```ignore
+    /// let child = self.child_mut("child_name").unwrap();
+    ///
+    /// if let Some(downcasted_child) = child.downcast_mut::<MyComponent>() {
+    ///    // do something with the downcasted child    
+    /// }
+    /// ```
+    ///
+    /// ... or just use the [child_downcast_mut] utility function
+    ///
     /// # Arguments
     /// * `name` - The name of the child component.
     ///
@@ -195,6 +212,8 @@ pub trait Component: Downcast + ComponentAccessors {
     /// }
     /// ```
     ///
+    /// ... or just use the [child_downcast] utility functions.
+    ///
     /// # Arguments
     /// * `name` - The name of the child component.
     ///
@@ -212,76 +231,50 @@ pub trait Component: Downcast + ComponentAccessors {
 
 impl_downcast!(Component);
 
-/// Update the children's state based on a received action.
-///
-/// This helper function is used to update the children's state based on a received action. It was
-/// created to allow to easily override the default `update` method of a component implementation
-/// and still be able to call the children's `update` method.
-pub fn update_children<T: Component + ?Sized>(this: &mut T, action: Action) {
-    if this.is_active() {
-        if let Some(children) = this.get_children() {
+/// Update the component and its childrend recursively, based on a received action.
+fn update<T: Component + ?Sized>(c: &mut T, action: &Action) {
+    if c.is_active() {
+        c.update(&action);
+
+        if let Some(children) = c.get_children() {
             for child in children.values_mut() {
-                if child.is_active() {
-                    child.update(&action);
-                }
+                update(child.as_mut(), action);
             }
         }
     }
 }
 
-/// Pass a message to the children of a component.
-///
-/// This helper function is used to pass a message to the children of a component. It was created
-/// to allow to easily override the default `receive_message` method of a component implementation
-/// and still be able pass the call to the children's `receive_message` method.
-pub fn pass_message_to_children<T: Component + ?Sized>(this: &mut T, message: String) {
-    if let Some(children) = this.get_children() {
-        for child in children.values_mut() {
-            if child.is_active() {
-                child.receive_message(message.clone());
+/// Handle a message for a specific component and its children, recursively.
+fn handle_message<T: Component + ?Sized>(c: &mut T, message: String) {
+    c.receive_message(message.clone());
+
+    if c.is_active() {
+        if let Some(children) = c.get_children() {
+            for child in children.values_mut() {
+                handle_message(child.as_mut(), message.clone());
             }
         }
     }
 }
 
-/// Set active/inactive to the children of a component.
-///
-/// This helper function is used to set active/inactive to the children of a component. It was
-/// created to allow to easily implement the default `set_active` method of a component
-/// implementation and be able to call the children's `set_active` method.
-pub fn set_active_on_children<T: Component + ?Sized>(this: &mut T, active: bool) {
-    if let Some(children) = this.get_children() {
+/// Initialize a component and its children recursively.
+fn init<T: Component + ?Sized>(c: &mut T, area: Size) {
+    c.init(area);
+
+    if let Some(children) = c.get_children() {
         for child in children.values_mut() {
-            child.set_active(active);
+            init(child.as_mut(), area);
         }
     }
 }
 
-/// Initialize the children of a component.
-///
-/// This helper function is used to initialize the children of a component. It was created to
-/// allow to easily override the default `init` method of a component implementation and still be
-/// able to call the children's `init` method.
-pub fn init_children<T: Component + ?Sized>(this: &mut T, area: Size) {
-    if let Some(children) = this.get_children() {
-        for child in children.values_mut() {
-            child.init(area);
-        }
-    }
-}
+/// Set the action handler for a component and its children recursively.
+fn receive_action_handler<T: Component + ?Sized>(c: &mut T, tx: UnboundedSender<String>) {
+    c.register_action_handler(tx.clone());
 
-/// Pass the action handler to the children of a component.
-///
-/// This helper function is used to pass the action handler to the children of a component. It was
-/// created to allow to easily override the default `register_action_handler` method of a component
-/// implementation and still be able to call the children's `register_action_handler` method.
-pub fn pass_action_handler_to_children<T: Component + ?Sized>(
-    this: &mut T,
-    tx: UnboundedSender<String>,
-) {
-    if let Some(children) = this.get_children() {
+    if let Some(children) = c.get_children() {
         for child in children.values_mut() {
-            child.register_action_handler(tx.clone());
+            receive_action_handler(child.as_mut(), tx.clone());
         }
     }
 }

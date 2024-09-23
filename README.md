@@ -241,7 +241,7 @@ textarea..with_validations(vec![
 
 ## `GridSelector` Widget
 
-A selector restful widget that can be used to select items from a list. The items are displayed in a
+A selector stateful widget that can be used to select items from a list. The items are displayed in a
 grid, and the user can navigate through them using, for example, the arrow keys.
 
 ![grid selector](https://raw.githubusercontent.com/lucodear/matetui/master/.github/media/grid.png)
@@ -280,11 +280,11 @@ implement the `Into<GridItem>` trait for a custom type.
 
 A simple stateless switch widget that can be used to show visual feedback of a boolean state.
 
-- On
+- Off
   
 ![switch](https://raw.githubusercontent.com/lucodear/matetui/master/.github/media/switch.png)
 
-- Off
+- On
   
 ![switchon](https://raw.githubusercontent.com/lucodear/matetui/master/.github/media/switch-on.png)
 

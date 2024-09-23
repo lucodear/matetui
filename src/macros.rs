@@ -160,7 +160,6 @@ macro_rules! component {
             }
             fn register_action_handler(&mut self, tx: tokio::sync::mpsc::UnboundedSender<String>) {
                 self.action_sender = Some(tx.clone());
-                matetui::utils::component::pass_action_handler_to_children(self, tx)
             }
             fn send(&self, action: &str) {
                 if let Some(tx) = &self.action_sender {

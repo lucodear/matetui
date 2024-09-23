@@ -246,9 +246,9 @@ fn update<T: Component + ?Sized>(c: &mut T, action: &Action) {
 
 /// Handle a message for a specific component and its children, recursively.
 fn handle_message<T: Component + ?Sized>(c: &mut T, message: String) {
-    c.receive_message(message.clone());
-
     if c.is_active() {
+        c.receive_message(message.clone());
+
         if let Some(children) = c.get_children() {
             for child in children.values_mut() {
                 handle_message(child.as_mut(), message.clone());

@@ -4,6 +4,10 @@ version = "0.0.0-alpha.0"
 edition = "2021"
 description = "🧉 matetui » utilities for building Terminal User Interfaces"
 authors = ["Lucas Colombo <lucas@lucode.ar>"]
+license = "MIT"
+documentation = "https://docs.rs/matetui"
+homepage = "https://github.com/lucodear/matetui"
+repository = "https://github.com/lucodear/matetui"
 
 [profile.release]
 strip = "symbols"

@@ -2,7 +2,7 @@
 name = "matetui"
 version = "0.0.0-alpha.0"
 edition = "2021"
-description = "X » matetui"
+description = "🧉 matetui » utilities for building Terminal User Interfaces"
 authors = ["Lucas Colombo <lucas@lucode.ar>"]
 
 [profile.release]
@@ -17,6 +17,7 @@ debug = 0
 debug-assertions = false
 
 [lib]
+doctest = false
 name = "matetui"
 path = "src/lib.rs"
 

@@ -416,6 +416,7 @@ pub trait ComponentAccessors {
     fn send_action(&self, action: Action);
 
     // create a Component as default and active
+    #[allow(clippy::wrong_self_convention)]
     fn as_active(self) -> Self
     where
         Self: Sized;

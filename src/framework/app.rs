@@ -204,7 +204,7 @@ impl App {
                     // send it to all components as a raw string
                     for component in self.components.iter_mut() {
                         if component.is_active() {
-                            let _ = component.receive_message(action.clone());
+                            component.receive_message(action.clone());
                         }
                     }
                 }

@@ -44,15 +44,6 @@ pub enum ActionKind {
     Full(Action),
 }
 
-impl Into<Action> for ActionKind {
-    fn into(self) -> Action {
-        match self {
-            ActionKind::Stringified(s) => Action::AppAction(s.to_string()),
-            ActionKind::Full(a) => a,
-        }
-    }
-}
-
 impl From<&str> for ActionKind {
     fn from(s: &str) -> Self {
         ActionKind::Stringified(s.to_string())

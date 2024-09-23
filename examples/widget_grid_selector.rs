@@ -1,10 +1,5 @@
 use std::io;
 
-use ratatui::{
-    layout::{Alignment, Constraint, Direction, Layout},
-    style::{Modifier, Style, Stylize},
-    widgets::Paragraph,
-};
 use {
     crossterm::{
         event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
@@ -12,7 +7,13 @@ use {
         terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     },
     matetui::widgets::gridselector::{GridItem, GridSelector, GridSelectorState},
-    ratatui::{layout::Rect, prelude::CrosstermBackend, style::Color, Frame, Terminal},
+    ratatui::{
+        layout::{Alignment, Constraint, Direction, Layout, Rect},
+        prelude::CrosstermBackend,
+        style::{Color, Modifier, Style, Stylize},
+        widgets::Paragraph,
+        Frame, Terminal,
+    },
 };
 
 struct Item {

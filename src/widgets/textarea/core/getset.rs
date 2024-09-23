@@ -10,7 +10,7 @@ impl<'a> TextArea<'a> {
         self.style
     }
 
-    /// Remove the block of textarea which was set by [`TextArea::set_block`].
+    /// Remove the block of textarea
     pub fn remove_block(&mut self) {
         self.block = None;
     }
@@ -84,16 +84,12 @@ impl<'a> TextArea<'a> {
     }
 
     /// Get the yanked text. Text is automatically yanked when deleting strings by
-    /// [`TextArea::delete_line_by_head`], [`TextArea::delete_line_by_end`],
-    /// [`TextArea::delete_word`], [`TextArea::delete_next_word`], [`TextArea::delete_str`],
-    /// [`TextArea::copy`], and [`TextArea::cut`]. When multiple lines were yanked, they are always
-    /// joined with `\n`.
+    /// [`TextArea::delete_str`] When multiple lines were yanked, they are always with `\n`.
     pub fn yank_text(&self) -> String {
         self.yank.to_string()
     }
 
-    /// Set a yanked text. The text can be inserted by [`TextArea::paste`]. `\n` and `\r\n` are
-    /// recognized as newline but `\r` isn't.
+    /// Set a yanked text. `\n` and `\r\n` are recognized as newline but `\r` isn't.
     pub fn set_yank_text(&mut self, text: impl Into<String>) {
         // `str::lines` is not available since it strips a newline at end
         let lines: Vec<_> = text

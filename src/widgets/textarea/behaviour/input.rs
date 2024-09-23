@@ -37,7 +37,8 @@ pub enum Key {
     Cut,
     /// Paste key. This key is supported by termwiz only
     Paste,
-    /// An invalid key input (this key is always ignored by [`TextArea`](crate::TextArea))
+    /// An invalid key input (this key is always ignored by
+    /// [`TextArea`](crate::widgets::textarea::TextArea))
     #[default]
     Null,
 }

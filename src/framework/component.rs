@@ -227,6 +227,17 @@ pub trait Component: Downcast + ComponentAccessors {
             None
         }
     }
+
+    /// Notify the component that its active state has changed.
+    ///
+    /// Whenever the active state of a component changes, the component will be notified through
+    /// this method. This is useful for components that need to perform some action when they are
+    /// activated or deactivated.
+    ///
+    /// # Arguments
+    /// * `active` - The new active state of the component.
+    #[allow(unused_variables)]
+    fn on_active_changed(&mut self, active: bool) {}
 }
 
 impl_downcast!(Component);

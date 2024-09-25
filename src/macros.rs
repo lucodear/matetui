@@ -157,6 +157,7 @@ macro_rules! component {
             }
             fn set_active(&mut self, active: bool) {
                 self.is_active = active;
+                self.on_active_changed(active);
             }
             fn register_action_handler(&mut self, tx: tokio::sync::mpsc::UnboundedSender<String>) {
                 self.action_sender = Some(tx.clone());
@@ -173,6 +174,7 @@ macro_rules! component {
             }
             fn as_active(mut self) -> Self {
                 self.set_active(true);
+                self.on_active_changed(true);
                 self
             }
             fn get_children(&mut self) -> Option<&mut matetui::Children> {

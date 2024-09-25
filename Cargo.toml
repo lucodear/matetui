@@ -1,6 +1,6 @@
 [package]
 name = "matetui"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 description = "🧉 matetui » utilities for building Terminal User Interfaces"
 authors = ["Lucas Colombo <lucas@lucode.ar>"]

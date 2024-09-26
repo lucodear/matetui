@@ -20,5 +20,20 @@
             "environment": [],
             "preLaunchTask": "cargo: build",
         },
+        {
+            "name": "debug: textarea",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/examples/widget_text_area.exe",
+            "args": [
+                "--example",
+                "widget_text_area"
+            ],
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "preLaunchTask": "cargo: build",
+        },
     ]
 }

@@ -91,15 +91,11 @@ pub struct Input {
 }
 
 impl Input {
-    /// Returns Some(char) if the Input is a single char without any modifiers (except Shift for
-    /// case) and None otherwise.
+    /// Returns Some(char) if the Input is a char key input.
     pub fn maybe_char(&self) -> Option<char> {
         match self {
             Input {
-                key: Key::Char(c),
-                ctrl: false,
-                alt: false,
-                ..
+                key: Key::Char(c), ..
             } => Some(*c),
             _ => None,
         }
@@ -155,6 +151,18 @@ impl Input {
                 key: Key::Char(_),
                 ctrl: false,
                 alt: false,
+                ..
+            }
+        )
+    }
+
+    /// Returns `true` if the Input is a single char with or without modifiers.
+    #[inline]
+    pub fn is_char_raw(&self) -> bool {
+        matches!(
+            self,
+            Input {
+                key: Key::Char(_),
                 ..
             }
         )
@@ -246,6 +254,9 @@ impl Input {
             i if i.is_end() => ":end",
             i if i.is_ctrl_left() => ":word-left",
             i if i.is_ctrl_right() => ":word-right",
+            // char with modifiers probably, that wasn't handled above
+            // e.g. alt+64... better to handle it as a last resort than not handling it at all
+            i if i.is_char_raw() => ":char",
             _ => "",
         }
     }
